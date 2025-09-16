@@ -1,0 +1,310 @@
+<!-- Chosen Palette: Calm Harmony -->
+<!-- Application Structure Plan: Aplikasi ini dirancang sebagai SPA (Single-Page Application) dengan tata letak vertikal yang didukung oleh navigasi sticky di bagian atas untuk akses cepat ke setiap aspek analisis (Pasar, Teknis, Manajemen, Finansial). Struktur ini dipilih untuk meniru alur membaca dokumen asli namun dengan tambahan interaktivitas. Puncaknya adalah dasbor finansial di mana pengguna dapat memanipulasi data input untuk melihat perubahan hasil kalkulasi dan grafik secara real-time. Alur ini mengubah pembelajaran pasif menjadi eksplorasi aktif terhadap konsep-konsep kelayakan usaha. -->
+<!-- Visualization & Content Choices: Report Info: Data finansial (biaya tetap, biaya variabel, harga jual) & kebutuhan visualisasi BEP. -> Goal: Memvisualisasikan hubungan antara biaya, pendapatan, dan titik impas. -> Viz/Presentation Method: Grafik Garis (Line Chart) dinamis. -> Interaction: Grafik diperbarui secara otomatis ketika pengguna mengubah input finansial dan menekan tombol hitung. Ini memungkinkan analisis "what-if". -> Justification: Visualisasi dinamis jauh lebih instruktif daripada gambar statis, memungkinkan pemahaman mendalam tentang bagaimana variabel yang berbeda mempengaruhi profitabilitas. -> Library/Method: Chart.js (Canvas). -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Kelayakan Usaha Interaktif - Indah Raya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4; 
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F7F4]">
+
+    <header class="bg-white shadow-md p-6 text-center">
+        <h1 class="text-4xl font-bold text-[#003C43] mb-2">Analisis Kelayakan Usaha Interaktif</h1>
+        <p class="text-lg text-gray-600">Studi Kasus: Butik Pakaian Online "Indah Raya"</p>
+    </header>
+
+    <nav class="sticky-nav bg-[#135D66]/90 backdrop-blur-sm shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center items-center space-x-4 md:space-x-8 py-3">
+                <a href="#studi-kasus" class="text-white hover:text-[#E3FEF7] transition duration-300 font-medium text-sm md:text-base">Studi Kasus</a>
+                <a href="#aspek-pasar" class="text-white hover:text-[#E3FEF7] transition duration-300 font-medium text-sm md:text-base">Pasar</a>
+                <a href="#aspek-teknis" class="text-white hover:text-[#E3FEF7] transition duration-300 font-medium text-sm md:text-base">Teknis</a>
+                <a href="#aspek-manajemen" class="text-white hover:text-[#E3FEF7] transition duration-300 font-medium text-sm md:text-base">Manajemen</a>
+                <a href="#aspek-finansial" class="text-white hover:text-[#E3FEF7] transition duration-300 font-medium text-sm md:text-base">Finansial</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8 space-y-12">
+        <section id="studi-kasus" class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-[#003C43] mb-4 border-b-2 border-[#77B0AA] pb-2">Pendahuluan & Studi Kasus</h2>
+            <p class="text-gray-700 leading-relaxed mb-6">
+                Modul ini bertujuan untuk melatih kemampuan Anda dalam menganalisis kelayakan suatu ide usaha secara komprehensif. Bacalah studi kasus di bawah ini dan jawab pertanyaan-pertanyaan yang diberikan di setiap aspek. Gunakan kalkulator interaktif pada bagian finansial untuk membantu analisis Anda.
+            </p>
+            <div class="bg-[#E3FEF7] p-6 rounded-xl border border-[#77B0AA]">
+                <h3 class="font-semibold text-2xl text-[#135D66] mb-3">Butik Pakaian Online "Indah Raya"</h3>
+                <p class="text-gray-800 mb-4">"Indah Raya" adalah ide usaha butik pakaian wanita yang berfokus pada pasar anak muda (18-25 tahun) di kota besar. Rencana bisnisnya adalah menjual pakaian tren melalui sistem pre-order dan ready stock, dengan produk utama atasan, bawahan, dan dress.</p>
+                <h4 class="font-bold text-lg text-[#135D66]">Data Awal:</h4>
+                <ul class="list-disc list-inside space-y-1 text-gray-700 mt-2">
+                    <li><span class="font-medium">Modal Awal:</span> Rp 20.000.000</li>
+                    <li><span class="font-medium">Target Pasar:</span> Mahasiswi dan pekerja muda yang aktif di media sosial.</li>
+                    <li><span class="font-medium">Kompetitor:</span> Butik online lain dengan produk sejenis.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="aspek-pasar" class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-[#003C43] mb-4 border-b-2 border-[#77B0AA] pb-2">1. Aspek Pasar dan Pemasaran</h2>
+            <p class="italic text-gray-600 mb-4"><strong>Tujuan:</strong> Memahami seberapa besar potensi pasar dan bagaimana cara menarik pelanggan.</p>
+            <h3 class="font-semibold text-xl text-[#135D66] mb-3">Pertanyaan Diskusi:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700">
+                <li>Apakah target pasar "Indah Raya" sudah cukup spesifik? Jelaskan.</li>
+                <li>Bagaimana cara "Indah Raya" membedakan produknya dari kompetitor? (Contoh: kualitas, desain unik, harga, atau pelayanan).</li>
+                <li>Media sosial apa yang paling efektif untuk memasarkan produk ini? Mengapa?</li>
+            </ol>
+        </section>
+
+        <section id="aspek-teknis" class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-[#003C43] mb-4 border-b-2 border-[#77B0AA] pb-2">2. Aspek Teknis dan Produksi</h2>
+            <p class="italic text-gray-600 mb-4"><strong>Tujuan:</strong> Memastikan bahwa proses operasional usaha bisa berjalan lancar.</p>
+            <h3 class="font-semibold text-xl text-[#135D66] mb-3">Pertanyaan Diskusi:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700">
+                <li>Bagaimana "Indah Raya" akan memproduksi pakaiannya? (Contoh: menjahit sendiri, bekerja sama dengan konveksi lokal). Apa keuntungan dan risikonya?</li>
+                <li>Platform digital apa yang sebaiknya digunakan untuk jualan? (Contoh: Instagram, Shopee, Tokopedia, atau website sendiri).</li>
+            </ol>
+        </section>
+
+        <section id="aspek-manajemen" class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-[#003C43] mb-4 border-b-2 border-[#77B0AA] pb-2">3. Aspek Manajemen dan Organisasi</h2>
+            <p class="italic text-gray-600 mb-4"><strong>Tujuan:</strong> Memastikan struktur tim yang solid dan pembagian tugas yang jelas.</p>
+            <h3 class="font-semibold text-xl text-[#135D66] mb-3">Pertanyaan Diskusi:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700">
+                <li>Siapa saja yang dibutuhkan dalam tim "Indah Raya" di tahap awal? (Contoh: pemilik, admin media sosial, bagian keuangan).</li>
+                <li>Apa saja tugas utama dari setiap peran tersebut?</li>
+            </ol>
+        </section>
+
+        <section id="aspek-finansial" class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-[#003C43] mb-4 border-b-2 border-[#77B0AA] pb-2">4. Aspek Finansial</h2>
+            <p class="italic text-gray-600 mb-4"><strong>Tujuan:</strong> Memastikan usaha ini menguntungkan secara finansial.</p>
+             <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-semibold text-xl text-[#135D66] mb-3">Input Data Finansial (Asumsi Bulanan)</h3>
+                    <p class="text-gray-600 mb-4">Ubah nilai di bawah untuk melakukan simulasi dan lihat dampaknya pada hasil dan grafik.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="fixed-cost" class="font-medium text-gray-700">Biaya Tetap (Rp)</label>
+                            <input type="number" id="fixed-cost" value="4000000" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#135D66] focus:border-[#135D66] transition">
+                        </div>
+                        <div>
+                            <label for="variable-cost-per-unit" class="font-medium text-gray-700">Biaya Variabel per Unit (Rp)</label>
+                            <input type="number" id="variable-cost-per-unit" value="75000" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#135D66] focus:border-[#135D66] transition">
+                        </div>
+                        <div>
+                            <label for="selling-price-per-unit" class="font-medium text-gray-700">Harga Jual per Unit (Rp)</label>
+                            <input type="number" id="selling-price-per-unit" value="150000" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#135D66] focus:border-[#135D66] transition">
+                        </div>
+                        <div>
+                            <label for="production-units" class="font-medium text-gray-700">Target Penjualan (Unit)</label>
+                            <input type="number" id="production-units" value="100" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#135D66] focus:border-[#135D66] transition">
+                        </div>
+                    </div>
+                    <button id="calculate-btn" class="w-full mt-6 bg-[#135D66] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#003C43] transition-transform transform hover:scale-105 shadow-lg">
+                        Hitung & Visualisasikan Analisis
+                    </button>
+                </div>
+                <div id="result-container" class="bg-[#E3FEF7] p-6 rounded-xl border border-[#77B0AA]">
+                    <h3 class="font-semibold text-xl text-[#135D66] mb-4 text-center">Hasil Analisis</h3>
+                     <div id="result" class="space-y-3 hidden">
+                        <div class="flex justify-between items-center bg-white p-3 rounded-lg">
+                            <span class="font-medium text-gray-700">Titik Impas (BEP) Unit:</span>
+                            <span id="bep-units" class="font-bold text-lg text-green-600"></span>
+                        </div>
+                        <div class="flex justify-between items-center bg-white p-3 rounded-lg">
+                            <span class="font-medium text-gray-700">Total Biaya:</span>
+                            <span id="total-cost" class="font-bold text-lg text-red-600"></span>
+                        </div>
+                        <div class="flex justify-between items-center bg-white p-3 rounded-lg">
+                            <span class="font-medium text-gray-700">Total Pendapatan:</span>
+                            <span id="total-revenue" class="font-bold text-lg text-blue-600"></span>
+                        </div>
+                         <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-inner">
+                            <span class="font-bold text-gray-800 text-lg">Laba / Rugi Bersih:</span>
+                            <span id="net-profit" class="font-extrabold text-2xl"></span>
+                        </div>
+                    </div>
+                    <div id="placeholder-result" class="text-center text-gray-500 pt-16">
+                        <p>Tekan tombol hitung untuk melihat hasil analisis.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-8">
+                <h3 class="font-semibold text-xl text-[#135D66] mb-4 text-center">Grafik Titik Impas (Break-Even Point)</h3>
+                <div class="chart-container">
+                    <canvas id="bepChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center py-6 text-gray-500">
+            <p>&copy; 2025 Aplikasi Pembelajaran Kelayakan Usaha. Dibuat untuk tujuan edukasi.</p>
+        </footer>
+    </main>
+
+    <script>
+        let bepChart;
+
+        const formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(number);
+        };
+        
+        const initChart = () => {
+            const ctx = document.getElementById('bepChart').getContext('2d');
+            bepChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Total Pendapatan',
+                        data: [],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }, {
+                        label: 'Total Biaya',
+                        data: [],
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => formatRupiah(value)
+                            }
+                        },
+                        x: {
+                           title: {
+                               display: true,
+                               text: 'Jumlah Unit Terjual'
+                           }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${formatRupiah(context.raw)}`
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                }
+            });
+        };
+
+        const calculateAndDraw = () => {
+            const fixedCost = parseFloat(document.getElementById('fixed-cost').value) || 0;
+            const variableCostPerUnit = parseFloat(document.getElementById('variable-cost-per-unit').value) || 0;
+            const sellingPricePerUnit = parseFloat(document.getElementById('selling-price-per-unit').value) || 0;
+            const productionUnits = parseFloat(document.getElementById('production-units').value) || 0;
+            
+            const resultDiv = document.getElementById('result');
+            const placeholderResult = document.getElementById('placeholder-result');
+
+            if (sellingPricePerUnit <= variableCostPerUnit) {
+                alert('Harga Jual harus lebih besar dari Biaya Variabel per Unit untuk dapat menghitung BEP.');
+                return;
+            }
+
+            const bepUnits = fixedCost / (sellingPricePerUnit - variableCostPerUnit);
+            const totalCost = fixedCost + (variableCostPerUnit * productionUnits);
+            const totalRevenue = sellingPricePerUnit * productionUnits;
+            const netProfit = totalRevenue - totalCost;
+
+            document.getElementById('bep-units').textContent = `${bepUnits.toFixed(2)} unit`;
+            document.getElementById('total-cost').textContent = formatRupiah(totalCost);
+            document.getElementById('total-revenue').textContent = formatRupiah(totalRevenue);
+            const netProfitEl = document.getElementById('net-profit');
+            netProfitEl.textContent = formatRupiah(netProfit);
+            netProfitEl.className = 'font-extrabold text-2xl ';
+            if (netProfit < 0) {
+                 netProfitEl.classList.add('text-red-600');
+            } else {
+                 netProfitEl.classList.add('text-[#003C43]');
+            }
+
+            resultDiv.classList.remove('hidden');
+            placeholderResult.classList.add('hidden');
+
+            updateChart(fixedCost, variableCostPerUnit, sellingPricePerUnit, bepUnits, productionUnits);
+        };
+        
+        const updateChart = (fixedCost, variableCostPerUnit, sellingPricePerUnit, bepUnits, productionUnits) => {
+            const labels = [];
+            const revenueData = [];
+            const costData = [];
+            
+            const maxUnits = Math.max(bepUnits * 2, productionUnits * 1.5, 100);
+            const step = Math.ceil(maxUnits / 10);
+
+            for (let i = 0; i <= maxUnits; i += step) {
+                labels.push(i);
+                revenueData.push(i * sellingPricePerUnit);
+                costData.push(fixedCost + (i * variableCostPerUnit));
+            }
+
+            bepChart.data.labels = labels;
+            bepChart.data.datasets[0].data = revenueData;
+            bepChart.data.datasets[1].data = costData;
+            bepChart.update();
+        };
+
+        document.getElementById('calculate-btn').addEventListener('click', calculateAndDraw);
+        window.onload = () => {
+            initChart();
+        };
+    </script>
+</body>
+</html>
